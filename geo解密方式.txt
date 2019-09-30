@@ -1,0 +1,85 @@
+1.定义decode方法并传入加密参数a(string类型)
+2.定义一个变量b
+3.获取a的第一个字符并赋值给b
+4.定义变量c,并且赋值为-1,定义常量数组arr=["=", ".", "-", "*"]
+5.如果b等于常量数组arr的第二条数据 则变量c等于2 否则 如果b等于常量数组arr的第三条数据 则变量c等于1 否则 如果b等于常量数组arr的第四条数据 则变量c=0
+6.把c的值赋给b
+7.定义变量c2等于参数a从1号位开始的值(即去除a的第一位)
+8.for循环
+function decode(a){
+  var b;
+  b=a.charAt(0);
+  var arr = ["=", ".", "-", "*"]
+  var c=-1;
+  b==arr[1]?c=2:b==arr[2]?c=1:b==arr[3]&&(c=0);
+  b=c;
+  for(var c2=a.substr(1), d=0, e=c2.length, f=[], a=[], g=[]; d<e; ){
+    if(c2.charAt(d)==arr[0]){ //如果c2在d位置这里的元素等于arr的第一位
+      if(13>e-d)return 0; 
+      a:{  //函数体
+        for(var g=c2.substr(d,13),i=f,k=0,l=0,m=0,n=0;6>n;n++){ //定义g等于c2从d位置到13位置的值
+          m=ch(g.substr(1+n,1)); //ch为另一个方法,返回的是g在某个位置的值的计算结果
+          if(0>m){
+            g=-1-n;
+            break a //跳出函数体
+          }
+          k+=m<<6*n; // << 是左移运算符(二进制) 例如 5 << 1 => 0101 << 1 结果为 1010 换成十进制为10
+          m=ch(g.substr(7+n,1)); //跟上述ch方法用法一样
+          if(0>m){
+            g=-7-n;
+            break a
+          }
+          l+=m<<6*n
+        }
+        i.push(k); //往i数组里塞入元素k
+        i.push(l); //同理
+        g=0
+      }
+      if(0>g)return 0;
+      d+=13
+    }else if(";"==c2.charAt(d)){
+      a.push(f.slice(0)) //数组a中塞入f从位置0开始之后的元素
+      f.length=0
+      ++d; //d+1
+    }else{
+      if(8>e-d) 
+        return 0;
+        g=dh(c.substr(d, 8),f); //调用dh方法获取从d位置开始的后8位值
+        if(0>g)return 0;
+        d+=8
+    }
+  }
+  c=0;
+  for(d=a.length;c<d;c++){
+    e=0;
+    for(f=a[c].length;e<f;e++){
+      a[c][e]/=100
+    }
+  }
+  return a
+}
+
+//定义一个方法dh
+function dh(a,b){
+  var c=b.length; //定义变量c等于b的长度
+  if(2>c)return-1; //如果2大于c则返回-1
+  for(var d=0,e=0,f=0,g=0;4>g;g++){ //
+    f=ch(a.substr(g,1)); 
+    if(0>f)return-1-g;
+    d+=f<<6*g;
+    f=ch(a.substr(4+g,1));
+    if(0>f)return-5-g;
+    e+=f<<6*g
+  }
+  d>8388608&&(d=8388608-d); //如果d>8388608则d=8388608-d
+  e>8388608&&(e=8388608-e);
+  b.push(b[c-2]+d); //把参数b在位置c-2的值加上d的值再次塞到参数b中
+  b.push(b[c-1]+e);
+  return 0
+}
+
+//定义一个方法ch
+function ch(a){
+  var b=a.charCodeAt(0); //定义变量b=参数a在0位置的Unicode编码
+  return "A"<=a&&"Z">=a ? b-65 : "a"<=a&&"z">=a ? 26+b-97 : "0"<=a&&"9">=a ? 52+b-48 : "+"==a ? 62 : "/"==a ? 63 : -1 //多个二元一次判断
+}; 
